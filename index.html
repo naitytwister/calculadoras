@@ -1,0 +1,1195 @@
+// Inicializar calculadoras ao carregar página
+        <!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arsenal Empreendedor - Calculadoras Automatizadas</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #0F172A;
+            color: #1E293B;
+            line-height: 1.6;
+        }
+
+        .header {
+            background: #FFFFFF;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            color: #1E293B;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: #64748B;
+            font-size: 1rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            flex: 1;
+            min-width: 200px;
+            padding: 1rem;
+            background: #FFFFFF;
+            border: none;
+            border-radius: 8px 8px 0 0;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #64748B;
+            transition: all 0.3s;
+        }
+
+        .tab:hover {
+            background: #FEF3C7;
+        }
+
+        .tab.active {
+            background: #F59E0B;
+            color: #FFFFFF;
+        }
+
+        .calculator {
+            display: none;
+            background: #FFFFFF;
+            border-radius: 0 0 8px 8px;
+            padding: 2rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .calculator.active {
+            display: block;
+        }
+
+        .calc-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .calc-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .section {
+            margin-bottom: 2rem;
+        }
+
+        .section h3 {
+            color: #1E293B;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #F59E0B;
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .input-group label {
+            display: block;
+            color: #1E293B;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .input-group input,
+        .input-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #E2E8F0;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border 0.3s;
+        }
+
+        .input-group input:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: #F59E0B;
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .slider-container input[type="range"] {
+            flex: 1;
+        }
+
+        .slider-value {
+            min-width: 60px;
+            font-weight: 600;
+            color: #F59E0B;
+        }
+
+        .result-card {
+            background: #F8FAFC;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border-left: 4px solid #F59E0B;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid #E2E8F0;
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .result-label {
+            color: #64748B;
+            font-weight: 500;
+        }
+
+        .result-value {
+            color: #1E293B;
+            font-weight: 700;
+            font-size: 1.25rem;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .badge-success {
+            background: #D1FAE5;
+            color: #065F46;
+        }
+
+        .badge-warning {
+            background: #FEF3C7;
+            color: #92400E;
+        }
+
+        .badge-danger {
+            background: #FEE2E2;
+            color: #991B1B;
+        }
+
+        .chart-container {
+            margin: 2rem 0;
+            padding: 1rem;
+            background: #FFFFFF;
+            border-radius: 8px;
+            height: 300px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+        }
+
+        th, td {
+            padding: 0.75rem;
+            text-align: right;
+            border-bottom: 1px solid #E2E8F0;
+        }
+
+        th {
+            background: #F8FAFC;
+            color: #1E293B;
+            font-weight: 600;
+        }
+
+        td:first-child, th:first-child {
+            text-align: left;
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+            color: #FFFFFF;
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            margin: 2rem 0;
+        }
+
+        .highlight-box h2 {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .highlight-box p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .copy-box {
+            background: #F8FAFC;
+            padding: 1.5rem;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            margin: 1rem 0;
+            white-space: pre-wrap;
+            border: 2px dashed #E2E8F0;
+        }
+
+        .btn {
+            background: #F59E0B;
+            color: #FFFFFF;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            min-height: 44px;
+        }
+
+        .btn:hover {
+            background: #D97706;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+        }
+
+        .footer {
+            background: #FFFFFF;
+            padding: 2rem;
+            text-align: center;
+            margin-top: 3rem;
+        }
+
+        .footer p {
+            color: #64748B;
+            margin-bottom: 1rem;
+        }
+
+        .footer a {
+            color: #F59E0B;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background: #D1FAE5;
+            color: #065F46;
+        }
+
+        .alert-warning {
+            background: #FEF3C7;
+            color: #92400E;
+        }
+
+        .alert-danger {
+            background: #FEE2E2;
+            color: #991B1B;
+        }
+
+        .indicator-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .indicator-card {
+            background: #F8FAFC;
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+            border-top: 4px solid #F59E0B;
+        }
+
+        .indicator-card .value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1E293B;
+            margin: 0.5rem 0;
+        }
+
+        .indicator-card .label {
+            color: #64748B;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Arsenal Empreendedor</h1>
+        <p>Calculadoras Automatizadas para Consultores de Gestão</p>
+    </div>
+
+    <div class="container">
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab(0)">💰 Precificação</button>
+            <button class="tab" onclick="switchTab(1)">📊 Fluxo de Caixa</button>
+            <button class="tab" onclick="switchTab(2)">📈 ROI do Projeto</button>
+        </div>
+
+        <!-- CALCULADORA 1: PRECIFICAÇÃO -->
+        <div class="calculator active" id="calc-1">
+            <div class="calc-grid">
+                <div>
+                    <div class="section">
+                        <h3>Dados do Projeto</h3>
+                        <div class="input-group">
+                            <label>Seu Custo/Hora (R$)</label>
+                            <input type="number" id="custoHora" value="150" min="0" step="10" oninput="calcPrecificacao()">
+                        </div>
+                        <div class="input-group">
+                            <label>Horas Estimadas do Projeto</label>
+                            <input type="number" id="horasProjeto" value="80" min="0" step="1" oninput="calcPrecificacao()">
+                        </div>
+                        <div class="input-group">
+                            <label>Margem de Lucro Desejada (%)</label>
+                            <div class="slider-container">
+                                <input type="range" id="margem" min="10" max="100" value="40" oninput="calcPrecificacao()">
+                                <span class="slider-value" id="margemValue">40%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h3>Valor para o Cliente</h3>
+                        <div class="input-group">
+                            <label>Receita Anual Atual do Cliente (R$)</label>
+                            <input type="number" id="receitaCliente" value="500000" min="0" step="1000" placeholder="Ex: 500000" oninput="calcPrecificacao()">
+                        </div>
+                        <div class="input-group">
+                            <label>Aumento de Receita Esperado (%)</label>
+                            <div class="slider-container">
+                                <input type="range" id="aumentoReceita" min="0" max="200" value="15" oninput="calcPrecificacao()">
+                                <span class="slider-value" id="aumentoValue">15%</span>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>Redução de Custos Esperada (R$/ano)</label>
+                            <input type="number" id="reducaoCustos" value="30000" min="0" step="1000" oninput="calcPrecificacao()">
+                        </div>
+                        <div class="input-group">
+                            <label>Preço Médio da Concorrência (R$)</label>
+                            <input type="number" id="precoConcorrencia" value="20000" min="0" step="1000" oninput="calcPrecificacao()">
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="section">
+                        <h3>Precificação Tradicional</h3>
+                        <div class="result-card">
+                            <div class="result-item">
+                                <span class="result-label">Preço Base (por hora)</span>
+                                <span class="result-value" id="precoBase">R$ 12.000,00</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="result-label">Preço com Margem</span>
+                                <span class="result-value" id="precoMargem">R$ 16.800,00</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h3>Precificação por Valor</h3>
+                        <div class="result-card">
+                            <div class="result-item">
+                                <span class="result-label">ROI Gerado para Cliente</span>
+                                <span class="result-value" id="roiCliente">R$ 105.000,00</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="result-label">Valor Justo (10% do ROI)</span>
+                                <span class="result-value" id="valorJusto">R$ 10.500,00</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="result-label">Múltiplo de ROI</span>
+                                <span class="result-value" id="multiploROI">5,0x</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h3>Recomendação Final</h3>
+                        <div class="result-card">
+                            <div class="result-item">
+                                <span class="result-label">Preço Recomendado</span>
+                                <span class="result-value" id="precoRecomendado">R$ 20.000,00</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="result-label">Diferença vs. Preço/Hora</span>
+                                <span class="result-value" id="diferencaPreco">R$ 3.200,00</span>
+                            </div>
+                        </div>
+                        <div style="text-align: center; margin-top: 1rem;">
+                            <span class="badge" id="statusBadge">✅ Forte oportunidade</span>
+                        </div>
+                    </div>
+
+                    <div class="chart-container">
+                        <canvas id="chartPrecificacao"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CALCULADORA 2: FLUXO DE CAIXA -->
+        <div class="calculator" id="calc-2">
+            <div class="calc-grid">
+                <div>
+                    <div class="section">
+                        <h3>Configuração do Negócio</h3>
+                        <div class="input-group">
+                            <label>Clientes Ativos/Mês (atual)</label>
+                            <input type="number" id="clientesAtivos" value="5" min="0" step="1" oninput="calcFluxoCaixa()">
+                        </div>
+                        <div class="input-group">
+                            <label>Ticket Médio por Cliente (R$)</label>
+                            <input type="number" id="ticketMedio" value="8000" min="0" step="100" oninput="calcFluxoCaixa()">
+                        </div>
+                        <div class="input-group">
+                            <label>Crescimento Mensal Esperado (%)</label>
+                            <div class="slider-container">
+                                <input type="range" id="crescimentoMensal" min="0" max="20" value="5" step="0.5" oninput="calcFluxoCaixa()">
+                                <span class="slider-value" id="crescimentoValue">5%</span>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>Despesas Fixas Mensais (R$)</label>
+                            <input type="number" id="despesasFixas" value="15000" min="0" step="100" oninput="calcFluxoCaixa()">
+                        </div>
+                        <div class="input-group">
+                            <label>Despesas Variáveis (% da receita)</label>
+                            <div class="slider-container">
+                                <input type="range" id="despesasVariaveis" min="0" max="50" value="20" oninput="calcFluxoCaixa()">
+                                <span class="slider-value" id="variaveisValue">20%</span>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>Saldo Inicial em Caixa (R$)</label>
+                            <input type="number" id="saldoInicial" value="50000" step="1000" oninput="calcFluxoCaixa()">
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="section">
+                        <h3>Indicadores-Chave</h3>
+                        <div class="indicator-grid">
+                            <div class="indicator-card">
+                                <div class="label">Receita Total Ano</div>
+                                <div class="value" id="receitaTotalAno">R$ 0</div>
+                            </div>
+                            <div class="indicator-card">
+                                <div class="label">Lucro Total Ano</div>
+                                <div class="value" id="lucroTotalAno">R$ 0</div>
+                            </div>
+                            <div class="indicator-card">
+                                <div class="label">Margem Líquida</div>
+                                <div class="value" id="margemLiquida">0%</div>
+                            </div>
+                            <div class="indicator-card">
+                                <div class="label">Capital de Giro</div>
+                                <div class="value" id="capitalGiro">R$ 0</div>
+                            </div>
+                        </div>
+                        <div id="alertasFluxo"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>Projeção de 12 Meses</h3>
+                <div style="overflow-x: auto;">
+                    <table id="tabelaFluxo">
+                        <thead>
+                            <tr>
+                                <th>Mês</th>
+                                <th>Receita</th>
+                                <th>Despesas</th>
+                                <th>Lucro</th>
+                                <th>Saldo</th>
+                            </tr>
+                        </thead>
+                        <tbody id="fluxoTbody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="chart-container" style="height: 400px;">
+                <canvas id="chartFluxo"></canvas>
+            </div>
+        </div>
+
+        <!-- CALCULADORA 3: ROI DO PROJETO -->
+        <div class="calculator" id="calc-3">
+            <div class="calc-grid">
+                <div>
+                    <div class="section">
+                        <h3>Informações do Projeto</h3>
+                        <div class="input-group">
+                            <label>Nome do Cliente</label>
+                            <input type="text" id="nomeCliente" value="Empresa ABC" oninput="calcROI()">
+                        </div>
+                        <div class="input-group">
+                            <label>Objetivo do Projeto</label>
+                            <select id="objetivoProjeto" onchange="calcROI()">
+                                <option value="vendas">Aumento de Vendas</option>
+                                <option value="custos">Redução de Custos</option>
+                                <option value="processos">Otimização de Processos</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>Investimento na Consultoria (R$)</label>
+                            <input type="number" id="investimento" value="25000" min="0" step="1000" oninput="calcROI()">
+                        </div>
+                        <div class="input-group">
+                            <label id="labelSituacao">Situação Atual (mensal) (R$)</label>
+                            <input type="number" id="situacaoAtual" value="50000" min="0" step="1000" oninput="calcROI()">
+                        </div>
+                        <div class="input-group">
+                            <label id="labelMeta">Meta de Melhoria (%)</label>
+                            <input type="number" id="metaMelhoria" value="20" min="0" step="1" oninput="calcROI()">
+                        </div>
+                        <div class="input-group">
+                            <label>Prazo para Resultado (meses)</label>
+                            <input type="number" id="prazoResultado" value="6" min="1" max="24" oninput="calcROI()">
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="section">
+                        <h3>Impacto Financeiro</h3>
+                        <div class="result-card">
+                            <div class="result-item">
+                                <span class="result-label">Ganho Mensal Projetado</span>
+                                <span class="result-value" id="ganhoMensal">R$ 10.000,00</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="result-label">Ganho Anual (12 meses)</span>
+                                <span class="result-value" id="ganhoAnual">R$ 120.000,00</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="result-label">Ganho em 3 Anos</span>
+                                <span class="result-value" id="ganho3Anos">R$ 360.000,00</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h3>Análise de ROI</h3>
+                        <div class="result-card">
+                            <div class="result-item">
+                                <span class="result-label">ROI (%)</span>
+                                <span class="result-value" id="roiProjeto">380%</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="result-label">Payback (meses)</span>
+                                <span class="result-value" id="payback">2,5</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="result-label">Retorno em 12 meses</span>
+                                <span class="result-value" id="retorno12">R$ 95.000,00</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="highlight-box">
+                        <p>ROI do Projeto</p>
+                        <h2 id="roiDestaque">380%</h2>
+                        <p id="textoRetorno">Cada R$ 1 investido retorna R$ 4,80</p>
+                    </div>
+
+                    <div id="alertasROI"></div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>Resumo Executivo</h3>
+                <div class="copy-box" id="resumoExecutivo"></div>
+                <button class="btn" onclick="copiarResumo()">📋 Copiar para Proposta</button>
+            </div>
+
+            <div class="chart-container">
+                <canvas id="chartROI"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Criado por <strong>Arsenal Empreendedor</strong> | <a href="https://arsenalemprendedor.substack.com" target="_blank">arsenalemprendedor.substack.com</a></p>
+        <p>Faça parte da newsletter semanal com ferramentas que economizam 10h/semana</p>
+        <button class="btn" onclick="window.open('https://arsenalemprendedor.substack.com', '_blank')">Assinar Newsletter</button>
+    </div>
+
+    <script>
+        // Variáveis globais para gráficos
+        let chartPrecificacao, chartFluxo, chartROI;
+
+        // Função para trocar entre abas
+        function switchTab(index) {
+            const tabs = document.querySelectorAll('.tab');
+            const calculators = document.querySelectorAll('.calculator');
+            
+            tabs.forEach((tab, i) => {
+                if (i === index) {
+                    tab.classList.add('active');
+                } else {
+                    tab.classList.remove('active');
+                }
+            });
+            
+            calculators.forEach((calc, i) => {
+                if (i === index) {
+                    calc.classList.add('active');
+                } else {
+                    calc.classList.remove('active');
+                }
+            });
+        }
+
+        // Formatação de valores
+        function formatarMoeda(valor) {
+            return 'R$ ' + valor.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function formatarPercentual(valor) {
+            return valor.toFixed(1) + '%';
+        }
+
+        // CALCULADORA 1: PRECIFICAÇÃO
+        function calcPrecificacao() {
+            // Validação e sanitização de inputs
+            const custoHora = Math.max(0, parseFloat(document.getElementById('custoHora').value) || 0);
+            const horasProjeto = Math.max(0, parseFloat(document.getElementById('horasProjeto').value) || 0);
+            const margem = Math.max(0, parseFloat(document.getElementById('margem').value) || 0);
+            const receitaCliente = Math.max(0, parseFloat(document.getElementById('receitaCliente').value) || 0);
+            const aumentoReceita = Math.max(0, parseFloat(document.getElementById('aumentoReceita').value) || 0);
+            const reducaoCustos = Math.max(0, parseFloat(document.getElementById('reducaoCustos').value) || 0);
+            const precoConcorrencia = Math.max(0, parseFloat(document.getElementById('precoConcorrencia').value) || 0);
+
+            // Atualizar displays dos sliders
+            document.getElementById('margemValue').textContent = margem + '%';
+            document.getElementById('aumentoValue').textContent = aumentoReceita + '%';
+
+            // === FÓRMULAS CALCULADORA 1 ===
+            // Preço Base = Custo por Hora × Horas do Projeto
+            const precoBase = custoHora * horasProjeto;
+            
+            // Preço com Margem = Preço Base × (1 + Margem%)
+            const precoMargem = precoBase * (1 + margem / 100);
+            
+            // ROI Cliente = (Receita Anual × % Aumento) + Redução de Custos
+            const roiCliente = (receitaCliente * aumentoReceita / 100) + reducaoCustos;
+            
+            // Valor Justo = 10% do ROI gerado para o cliente
+            const valorJusto = roiCliente * 0.10;
+            
+            // Preço Recomendado = Maior valor entre: preço com margem, valor justo ou preço da concorrência
+            const precoRecomendado = Math.max(precoMargem, valorJusto, precoConcorrencia);
+            
+            // Múltiplo de ROI = ROI Cliente / Preço Recomendado (quantas vezes o cliente recupera o investimento)
+            const multiploROI = precoRecomendado > 0 ? roiCliente / precoRecomendado : 0;
+            
+            // Diferença percentual entre preço recomendado e preço por hora
+            const diferencaPreco = precoRecomendado - precoMargem;
+            const percentualDiferenca = precoMargem > 0 ? (diferencaPreco / precoMargem) * 100 : 0;
+
+            // Atualizar valores
+            document.getElementById('precoBase').textContent = formatarMoeda(precoBase);
+            document.getElementById('precoMargem').textContent = formatarMoeda(precoMargem);
+            document.getElementById('roiCliente').textContent = formatarMoeda(roiCliente);
+            document.getElementById('valorJusto').textContent = formatarMoeda(valorJusto);
+            document.getElementById('multiploROI').textContent = multiploROI.toFixed(1) + 'x';
+            document.getElementById('precoRecomendado').textContent = formatarMoeda(precoRecomendado);
+            document.getElementById('diferencaPreco').textContent = formatarMoeda(diferencaPreco);
+
+            // Badge de status
+            const badge = document.getElementById('statusBadge');
+            if (percentualDiferenca > 30) {
+                badge.className = 'badge badge-success';
+                badge.textContent = '✅ Forte oportunidade';
+            } else if (percentualDiferenca >= 0 && multiploROI >= 3) {
+                badge.className = 'badge badge-warning';
+                badge.textContent = '⚠️ Avaliar contexto';
+            } else {
+                badge.className = 'badge badge-danger';
+                badge.textContent = '❌ Difícil justificar';
+            }
+
+            // Gráfico
+            atualizarGraficoPrecificacao(precoMargem, precoRecomendado, roiCliente);
+        }
+
+        function atualizarGraficoPrecificacao(precoMargem, precoRecomendado, roiCliente) {
+            const ctx = document.getElementById('chartPrecificacao');
+            
+            if (chartPrecificacao) {
+                chartPrecificacao.destroy();
+            }
+
+            // Ajustar escala do ROI para visualização (dividir por fator para caber no gráfico)
+            const fatorEscala = Math.max(precoMargem, precoRecomendado) > 0 
+                ? roiCliente / Math.max(precoMargem, precoRecomendado, 1) 
+                : 1;
+            const roiAjustado = fatorEscala > 5 ? roiCliente / 5 : roiCliente;
+            const usouAjuste = fatorEscala > 5;
+
+            chartPrecificacao = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Preço por Hora', 'Preço Recomendado', 'ROI Cliente (escala ajustada)'],
+                    datasets: [{
+                        label: 'Valor (R$)',
+                        data: [precoMargem, precoRecomendado, roiAjustado],
+                        backgroundColor: ['#64748B', '#F59E0B', '#10B981'],
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let value = context.parsed.y;
+                                    // Mostrar valor real do ROI no tooltip
+                                    if (context.dataIndex === 2 && usouAjuste) {
+                                        value = roiCliente;
+                                    }
+                                    return 'Valor: ' + formatarMoeda(value);
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return 'R$ ' + value.toLocaleString('pt-BR', {maximumFractionDigits: 0});
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // CALCULADORA 2: FLUXO DE CAIXA
+        function calcFluxoCaixa() {
+            // Validação e sanitização de inputs
+            const clientesAtivos = Math.max(0, parseFloat(document.getElementById('clientesAtivos').value) || 0);
+            const ticketMedio = Math.max(0, parseFloat(document.getElementById('ticketMedio').value) || 0);
+            const crescimentoMensal = Math.max(-50, Math.min(100, parseFloat(document.getElementById('crescimentoMensal').value) || 0));
+            const despesasFixas = Math.max(0, parseFloat(document.getElementById('despesasFixas').value) || 0);
+            const despesasVariaveis = Math.max(0, Math.min(100, parseFloat(document.getElementById('despesasVariaveis').value) || 0));
+            const saldoInicial = parseFloat(document.getElementById('saldoInicial').value) || 0;
+
+            // Atualizar displays
+            document.getElementById('crescimentoValue').textContent = crescimentoMensal + '%';
+            document.getElementById('variaveisValue').textContent = despesasVariaveis + '%';
+
+            const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+            let dados = [];
+            let saldo = saldoInicial;
+            let receitaTotal = 0;
+            let lucroTotal = 0;
+            let menorSaldo = saldoInicial;
+            let mesesNegativos = 0;
+
+            // === FÓRMULAS CALCULADORA 2 ===
+            // Calcular projeção de 12 meses
+            for (let i = 0; i < 12; i++) {
+                // Receita Mensal = Clientes × Ticket Médio × (1 + Crescimento%)^mês
+                // Exemplo: 5 clientes × R$8.000 × 1,05^3 = R$46.305 no mês 3
+                const receita = clientesAtivos * ticketMedio * Math.pow(1 + crescimentoMensal / 100, i);
+                
+                // Despesas = Fixas + (Receita × % Variável)
+                const despesas = despesasFixas + (receita * despesasVariaveis / 100);
+                
+                // Lucro = Receita - Despesas
+                const lucro = receita - despesas;
+                
+                // Saldo Acumulado = Saldo Anterior + Lucro do Mês
+                saldo += lucro;
+
+                receitaTotal += receita;
+                lucroTotal += lucro;
+
+                if (saldo < menorSaldo) menorSaldo = saldo;
+                if (saldo < 0) mesesNegativos++;
+
+                dados.push({
+                    mes: meses[i],
+                    receita: receita,
+                    despesas: despesas,
+                    lucro: lucro,
+                    saldo: saldo
+                });
+            }
+
+            // Atualizar tabela
+            const tbody = document.getElementById('fluxoTbody');
+            tbody.innerHTML = '';
+            dados.forEach(d => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${d.mes}</td>
+                    <td>${formatarMoeda(d.receita)}</td>
+                    <td>${formatarMoeda(d.despesas)}</td>
+                    <td style="color: ${d.lucro >= 0 ? '#10B981' : '#EF4444'}">${formatarMoeda(d.lucro)}</td>
+                    <td style="color: ${d.saldo >= 0 ? '#10B981' : '#EF4444'}; font-weight: 700">${formatarMoeda(d.saldo)}</td>
+                `;
+            });
+
+            // Atualizar indicadores
+            const margemLiquida = receitaTotal > 0 ? (lucroTotal / receitaTotal) * 100 : 0;
+            document.getElementById('receitaTotalAno').textContent = formatarMoeda(receitaTotal);
+            document.getElementById('lucroTotalAno').textContent = formatarMoeda(lucroTotal);
+            document.getElementById('margemLiquida').textContent = formatarPercentual(margemLiquida);
+            document.getElementById('capitalGiro').textContent = menorSaldo < 0 ? formatarMoeda(Math.abs(menorSaldo)) : 'R$ 0';
+
+            // Alertas
+            let alertasHTML = '';
+            if (menorSaldo < 0) {
+                alertasHTML += `<div class="alert alert-warning">⚠️ Atenção: Capital de giro necessário de ${formatarMoeda(Math.abs(menorSaldo))}</div>`;
+            }
+            if (margemLiquida < 20) {
+                alertasHTML += `<div class="alert alert-warning">💡 Considere revisar despesas ou aumentar preços</div>`;
+            }
+            if (mesesNegativos === 0 && margemLiquida >= 20) {
+                alertasHTML += `<div class="alert alert-success">✅ Fluxo de caixa saudável</div>`;
+            }
+            document.getElementById('alertasFluxo').innerHTML = alertasHTML;
+
+            // Gráfico
+            atualizarGraficoFluxo(dados);
+        }
+
+        function atualizarGraficoFluxo(dados) {
+            const ctx = document.getElementById('chartFluxo');
+            
+            if (chartFluxo) {
+                chartFluxo.destroy();
+            }
+
+            // Criar linha de referência no zero
+            const minSaldo = Math.min(...dados.map(d => d.saldo));
+            const maxSaldo = Math.max(...dados.map(d => d.saldo));
+            
+            chartFluxo = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: dados.map(d => d.mes),
+                    datasets: [
+                        {
+                            label: 'Saldo Acumulado',
+                            data: dados.map(d => d.saldo),
+                            borderColor: '#F59E0B',
+                            backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 4,
+                            pointHoverRadius: 6
+                        },
+                        {
+                            label: 'Break-even (Zero)',
+                            data: Array(dados.length).fill(0),
+                            borderColor: '#EF4444',
+                            borderWidth: 2,
+                            borderDash: [10, 5],
+                            fill: false,
+                            pointRadius: 0,
+                            pointHoverRadius: 0
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { 
+                            display: true,
+                            position: 'top'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    if (context.datasetIndex === 0) {
+                                        return 'Saldo: ' + formatarMoeda(context.parsed.y);
+                                    }
+                                    return 'Break-even';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            ticks: {
+                                callback: function(value) {
+                                    return 'R$ ' + value.toLocaleString('pt-BR', {maximumFractionDigits: 0});
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // CALCULADORA 3: ROI DO PROJETO
+        function calcROI() {
+            const nomeCliente = document.getElementById('nomeCliente').value.trim() || 'Cliente';
+            const objetivo = document.getElementById('objetivoProjeto').value;
+            const investimento = Math.max(0, parseFloat(document.getElementById('investimento').value) || 0);
+            const situacaoAtual = Math.max(0, parseFloat(document.getElementById('situacaoAtual').value) || 0);
+            const metaMelhoria = Math.max(0, parseFloat(document.getElementById('metaMelhoria').value) || 0);
+            const prazoResultado = Math.max(1, Math.min(24, parseFloat(document.getElementById('prazoResultado').value) || 1));
+
+            // Adaptar labels conforme objetivo
+            const labelSituacao = document.getElementById('labelSituacao');
+            const labelMeta = document.getElementById('labelMeta');
+            
+            if (objetivo === 'vendas') {
+                labelSituacao.textContent = 'Faturamento Mensal Atual (R$)';
+                labelMeta.textContent = 'Meta de Aumento (%)';
+            } else if (objetivo === 'custos') {
+                labelSituacao.textContent = 'Custos Mensais Atuais (R$)';
+                labelMeta.textContent = 'Meta de Redução (%)';
+            } else {
+                labelSituacao.textContent = 'Custo Operacional Mensal (R$)';
+                labelMeta.textContent = 'Meta de Economia (%)';
+            }
+
+            // === FÓRMULAS CALCULADORA 3 ===
+            // Ganho Mensal = Situação Atual × (Meta % / 100)
+            // Ex: R$50.000 × 20% = R$10.000/mês
+            const ganhoMensal = (situacaoAtual * metaMelhoria / 100);
+            
+            // Ganho Anual = Ganho Mensal × 12 meses
+            const ganhoAnual = ganhoMensal * 12;
+            
+            // Ganho em 3 Anos = Ganho Mensal × 36 meses
+            const ganho3Anos = ganhoMensal * 36;
+            
+            // ROI (%) = (Ganho Anual / Investimento) × 100
+            // Ex: (R$120.000 / R$25.000) × 100 = 480%
+            const roi = investimento > 0 ? (ganhoAnual / investimento) * 100 : 0;
+            
+            // Payback = Investimento / Ganho Mensal (em meses)
+            // Ex: R$25.000 / R$10.000 = 2,5 meses
+            const payback = ganhoMensal > 0 ? investimento / ganhoMensal : 0;
+            
+            // Retorno Líquido em 12 meses = Ganho Anual - Investimento
+            const retorno12 = ganhoAnual - investimento;
+            
+            // Multiplicador = Ganho Anual / Investimento
+            // Ex: R$120.000 / R$25.000 = 4,8x
+            const multiplicador = investimento > 0 ? ganhoAnual / investimento : 0;
+
+            // Atualizar valores
+            document.getElementById('ganhoMensal').textContent = formatarMoeda(ganhoMensal);
+            document.getElementById('ganhoAnual').textContent = formatarMoeda(ganhoAnual);
+            document.getElementById('ganho3Anos').textContent = formatarMoeda(ganho3Anos);
+            document.getElementById('roiProjeto').textContent = formatarPercentual(roi);
+            document.getElementById('payback').textContent = payback.toFixed(1);
+            document.getElementById('retorno12').textContent = formatarMoeda(retorno12);
+
+            // Highlight box
+            document.getElementById('roiDestaque').textContent = formatarPercentual(roi);
+            document.getElementById('textoRetorno').textContent = `Cada R$ 1 investido retorna R$ ${multiplicador.toFixed(2)}`;
+
+            // Alertas
+            let alertasHTML = '';
+            if (roi < 200) {
+                alertasHTML += `<div class="alert alert-warning">⚠️ ROI baixo. Revise as metas ou destaque benefícios qualitativos.</div>`;
+            }
+            if (payback > 12) {
+                alertasHTML += `<div class="alert alert-warning">💡 Payback longo. Enfatize ganhos de longo prazo.</div>`;
+            }
+            if (roi > 500) {
+                alertasHTML += `<div class="alert alert-success">✅ Proposta muito forte. Apresente com confiança!</div>`;
+            }
+            document.getElementById('alertasROI').innerHTML = alertasHTML;
+
+            // Resumo executivo
+            const resumo = `Projeto: ${nomeCliente}
+Investimento: ${formatarMoeda(investimento)}
+Retorno esperado (12 meses): ${formatarMoeda(ganhoAnual)}
+ROI: ${formatarPercentual(roi)}
+Payback: ${payback.toFixed(1)} meses
+Cada R$ 1 investido retorna R$ ${multiplicador.toFixed(2)}`;
+            
+            document.getElementById('resumoExecutivo').textContent = resumo;
+
+            // Gráfico
+            atualizarGraficoROI(investimento, retorno12);
+        }
+
+        function atualizarGraficoROI(investimento, retornoLiquido) {
+            const ctx = document.getElementById('chartROI');
+            
+            if (chartROI) {
+                chartROI.destroy();
+            }
+
+            chartROI = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ['Investimento', 'Retorno Líquido'],
+                    datasets: [{
+                        data: [investimento, Math.max(0, retornoLiquido)],
+                        backgroundColor: ['#EF4444', '#10B981'],
+                        borderWidth: 2,
+                        borderColor: '#FFFFFF'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                font: { size: 14 },
+                                padding: 20
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.label + ': ' + formatarMoeda(context.parsed);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function copiarResumo() {
+            const resumo = document.getElementById('resumoExecutivo').textContent;
+            
+            // Tentar copiar usando a API moderna
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(resumo).then(() => {
+                    // Feedback visual
+                    const btn = event.target;
+                    const textoOriginal = btn.textContent;
+                    btn.textContent = '✅ Copiado!';
+                    btn.style.background = '#10B981';
+                    
+                    setTimeout(() => {
+                        btn.textContent = textoOriginal;
+                        btn.style.background = '#F59E0B';
+                    }, 2000);
+                }).catch(err => {
+                    alert('Erro ao copiar. Tente selecionar o texto manualmente.');
+                    console.error('Erro ao copiar:', err);
+                });
+            } else {
+                // Fallback para navegadores antigos
+                const textArea = document.createElement('textarea');
+                textArea.value = resumo;
+                textArea.style.position = 'fixed';
+                textArea.style.left = '-999999px';
+                document.body.appendChild(textArea);
+                textArea.select();
+                
+                try {
+                    document.execCommand('copy');
+                    const btn = event.target;
+                    const textoOriginal = btn.textContent;
+                    btn.textContent = '✅ Copiado!';
+                    btn.style.background = '#10B981';
+                    
+                    setTimeout(() => {
+                        btn.textContent = textoOriginal;
+                        btn.style.background = '#F59E0B';
+                    }, 2000);
+                } catch (err) {
+                    alert('Erro ao copiar. Tente selecionar o texto manualmente.');
+                    console.error('Erro ao copiar:', err);
+                }
+                
+                document.body.removeChild(textArea);
+            }
+        }
+
+        // Verificar se Chart.js foi carregado
+        function verificarChartJS() {
+            if (typeof Chart === 'undefined') {
+                console.error('Chart.js não foi carregado. Verifique a conexão com a internet.');
+                const avisos = document.querySelectorAll('.chart-container');
+                avisos.forEach(aviso => {
+                    aviso.innerHTML = '<div style="padding: 2rem; text-align: center; color: #EF4444;">⚠️ Erro ao carregar gráficos. Verifique sua conexão com a internet.</div>';
+                });
+                return false;
+            }
+            return true;
+        }
+
+        // Inicializar calculadoras ao carregar página
+        window.addEventListener('load', () => {
+            if (verificarChartJS()) {
+                try {
+                    calcPrecificacao();
+                    calcFluxoCaixa();
+                    calcROI();
+                } catch (error) {
+                    console.error('Erro ao inicializar calculadoras:', error);
+                }
+            }
+        });
+
+        // Proteção contra erros de execução
+        window.addEventListener('error', (event) => {
+            console.error('Erro capturado:', event.error);
+        });
+    </script>
+</body>
+</html>
